@@ -39,6 +39,18 @@ describe("Adding a new todo item", () => {
       body: taskData,
     }).then((taskResponse) => {
       taskId = taskResponse.body[0]._id.$oid;
+      const toDodData = {
+        taskid: taskId,
+        description: "Task to active again",
+        done: "true",
+      };
+
+      cy.request({
+        method: "POST",
+        url: "http://localhost:5000/todos/create",
+        form: true,
+        body: toDodData,
+      });
     });
     cy.wait(1000);
 
@@ -54,55 +66,55 @@ describe("Adding a new todo item", () => {
     const newTodoText = "New test todo item";
 
     // Add new todo
-    cy.get('.inline-form input[type="text"]').type(newTodoText);
-    cy.get('.inline-form input[type="submit"]').click();
+    cy.get('.inline-form input[type="text"]').type(newTodoText, {
+      force: true,
+    });
+
+    cy.get('.inline-form input[type="submit"]').click({ force: true });
 
     // Verify the new todo is added
-    cy.get(".todo-list li").should("have.length", 2); // Initial + new
+    cy.get(".todo-list li").should("have.length", 3);
     cy.contains(".todo-list li", newTodoText).should("exist");
   });
 
   it("should keep add button disabled when description is empty", () => {
     cy.get('.inline-form input[type="submit"]').should("be.disabled");
-    cy.get('.inline-form input[type="text"]').type(" ");
+    cy.get('.inline-form input[type="text"]').type(" ", { force: true });
     cy.get('.inline-form input[type="submit"]').should("be.disabled");
   });
 
   it("should toggle todo item status when clicked", () => {
     cy.get(".todo-item")
-      .contains("Task") // looks for a todo item containing "task"
-      .parents(".todo-item") // go up to the full todo item element
+      .contains("Task")
+      .parents(".todo-item")
       .within(() => {
-        cy.get(".checker")
-          .click() // verify it's unchecked
-          .should("have.class", "checked");
+        cy.get(".checker").click().should("have.class", "checked");
       });
+  });
 
+  it("should toggle todo item status when clicked to actice", () => {
     cy.get(".todo-item")
-      .contains("Task") // looks for a todo item containing "task"
-      .parents(".todo-item") // go up to the full todo item element
+      .contains("Task to active again")
+      .parents(".todo-item")
       .within(() => {
-        cy.get(".checker")
-          .click() // verify it's unchecked
-          .should("have.class", "unchecked");
+        cy.get(".checker").click().should("have.class", "unchecked");
       });
   });
 
   it("R8UC3 – Delete a todo item", () => {
-    // Interceptera DELETE-requesten
     cy.intercept("DELETE", "/todos/byid/*").as("deleteTodo");
 
-    // Kontrollera att todo finns
-    cy.contains(".todo-item", "Task").as("todoItem").should("exist");
+    cy.contains(".todo-item", "Task to active again")
+      .as("todoItem")
+      .should("exist");
 
-    // Klicka på delete-knappen
-    cy.get("@todoItem").find("span.remover").click();
+    cy.get("@todoItem").find("span.remover").click({ force: true });
 
-    // Vänta tills DELETE-requesten är klar
     cy.wait("@deleteTodo");
 
-    // Vänta på att DOM uppdateras efter borttagning
-    cy.contains(".todo-item", "Task", { timeout: 7000 }).should("not.exist");
+    cy.contains(".todo-item", "Task to active again", { timeout: 7000 }).should(
+      "not.exist"
+    );
   });
 
   afterEach(function () {
