@@ -1,28 +1,29 @@
-name: Backend Unit Tests
+name: Run Backend Unit Tests
 
 on:
   push:
-    branches: ["main"]
+    branches: [master]
   pull_request:
-    branches: ["main"]
+    branches: [master]
 
 jobs:
   test:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4 # Ladda ner koden
+      - name: Checkout code
+        uses: actions/checkout@v3
 
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.9" # Använd samma Python-version som lokalt
+          python-version: "3.10"
 
       - name: Install dependencies
         run: |
-          pip install -r backend/requirements.txt  # Installera pytest + beroenden
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.pip
 
-      - name: Run unit tests
+      - name: Run targeted test file
         run: |
-          cd backend
-          pytest -m  assignment2 -v  # Kör alla tester
+          pytest backend/test/unit/test_userController.py
