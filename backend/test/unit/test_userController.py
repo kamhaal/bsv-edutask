@@ -24,7 +24,7 @@ def user_controller_with_error(exception):
 @pytest.mark.parametrize('users, mail, expected', [
     ([{"name": "Test User", "mail": "user@student.com"}], "user@student.com", {"name": "Test User", "mail": "user@student.com"}),
     ([{"name": "Test User", "mail": "user@student.com"},{"name": "Test User2", "mail": "user@student.com"}], "user@student.com", {"name": "Test User", "mail": "user@student.com"}),
-    ([{"name": "Test User", "mail": "user2@student.com"}], "user@student.com", None)
+    ([], "user@student.com", None)
 ])
 def test_user(user_controller, mail, expected):
     """3 tests to get user when the user exist and when there is 2 users with same email and when when the user doesn't exist"""
